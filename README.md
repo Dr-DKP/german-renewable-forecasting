@@ -115,7 +115,7 @@ The pipeline is designed in four independent stages. Each stage has clear inputs
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                   DATA INGESTION LAYER                   │
+│                   DATA INGESTION LAYER                  │
 │                                                         │
 │  SMARD API ──► Raw JSON ──► Validated Parquet Files     │
 │  DWD API   ──► Raw CSV  ──►  (data/raw/)                │
@@ -126,7 +126,7 @@ The pipeline is designed in four independent stages. Each stage has clear inputs
 │               FEATURE ENGINEERING LAYER                 │
 │                                                         │
 │  ► Temporal features (hour, day, week, month, season)   │
-│  ► Lag features (t-1h, t-24h, t-168h)                  │
+│  ► Lag features (t-1h, t-24h, t-168h)                   │
 │  ► Rolling statistics (mean, std, 24h/7d windows)       │
 │  ► Fourier terms (daily & annual seasonality)           │
 │  ► Weather coupling (Phase 2)                           │
@@ -137,8 +137,8 @@ The pipeline is designed in four independent stages. Each stage has clear inputs
 │                  MODELING LAYER                         │
 │                                                         │
 │  Model 1: Prophet  ──────────────────────────┐          │
-│  Model 2: XGBoost  ──────────────────────────┤──► UQ   │
-│  Model 3: LSTM     ──────────────────────────┘  layer  │
+│  Model 2: XGBoost  ──────────────────────────┤──► UQ    │
+│  Model 3: LSTM     ──────────────────────────┘  layer   │
 │                                                         │
 │  Evaluation: RMSE, MAE, MAPE, Coverage, Sharpness       │
 └─────────────────────────┬───────────────────────────────┘
