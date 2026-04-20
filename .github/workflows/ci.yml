@@ -26,14 +26,15 @@ jobs:
       # Step 3: install only what CI needs (not torch/mlflow — too slow)
       - name: Install dependencies
         run: |
-          pip install --upgrade pip               # ensure pip itself is current
-          pip install ruff pytest psycopg2-binary # only the tools CI actually uses
+          pip install --upgrade pip
+          pip install ruff pytest psycopg2-binary numpy  # numpy needed by test_metrics.py
 
       # Step 4: lint — ruff reads code without running it, flags style errors
       - name: Lint with ruff
-        run: ruff check .  # checks all .py files in the repo
+        run: ruff check .
 
       # Step 5: run only tests that do NOT need a live database
       # test_smoke.py needs localhost:5432 (our Docker container) — not available in CI
+      # PYTHONPATH=. makes the src/ package importable from the repo root
       - name: Run tests (no-db only)
-        run: pytest tests/ --ignore=tests/test_smoke.py -v
+        run: PYTHONPATH=. pytest tests/ --ignore=tests/test_smoke.py -v
