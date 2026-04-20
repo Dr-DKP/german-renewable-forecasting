@@ -21,15 +21,15 @@
 ## 📋 Backlog
 
 ### Phase 0 — Foundations (Days 1-2)
-- [ ] D1.1 — `gh repo create` + push, public
-- [ ] D1.2 — `docker-compose.yml` with TimescaleDB service
-- [ ] D1.3 — Commit CLAUDE.md, P2 plan, README stub
-- [ ] D1.4 — Commit ADR-000
-- [ ] D1.5 — Seed Kanban + risk register
-- [ ] D2.1 — `requirements.txt` + `environment.yml`
-- [ ] D2.2 — `tests/test_smoke.py`
-- [ ] D2.3 — GitHub Actions CI (ruff + pytest)
-- [ ] D2.4 — First concept note `01-hypertables.md`
+- [x] D1.1 — `gh repo create` + push, public
+- [x] D1.2 — `docker-compose.yml` with TimescaleDB service
+- [x] D1.3 — Commit CLAUDE.md, P2 plan, README stub
+- [x] D1.4 — Commit ADR-000
+- [x] D1.5 — Seed Kanban + risk register
+- [x] D2.1 — `requirements.txt` + `environment.yml`
+- [x] D2.2 — `tests/test_smoke.py`
+- [x] D2.3 — GitHub Actions CI (ruff + pytest)
+- [x] D2.4 — First concept note `01-hypertables.md`
 
 ### Phase 1 — Data Foundation (Days 3-5) — *unpacked as Phase 0 closes*
 - [ ] SMARD client
@@ -71,7 +71,7 @@
 
 ## 🏃 In Progress
 
-*(Move exactly one card here during the "Plan" block of the day. WIP limit: 1.)*
+- Phase 1 — SMARD client (`src/data/smard_client.py`) — written, needs live API test
 
 ---
 
@@ -83,7 +83,10 @@
 
 ## ✅ Done
 
-*(Closed cards move here at end of day.)*
+- **Phase 0 — Foundations** — completed 2026-04-20
+  - Repo public on GitHub, docker-compose + TimescaleDB running
+  - smoke test passing locally, CI green on GitHub Actions
+  - wiki notes 01–07 written, requirements fixed, README cleaned
 
 ---
 
