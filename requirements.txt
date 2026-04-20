@@ -6,6 +6,9 @@ pyarrow>=14.0
 # Data ingestion
 requests>=2.31
 aiohttp>=3.9
+pvlib>=0.10 #physics-based solar irradiance
+psycopg2-binary>=2.9 #python driver for PostgreSQL/TimescaleDB
+sqlalchemy>=2.0 #ORM: maps Python objects to DB tables
 
 # Visualization
 matplotlib>=3.8

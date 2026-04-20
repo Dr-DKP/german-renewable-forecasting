@@ -9,7 +9,6 @@ Transforms raw SMARD time-series into model-ready feature matrices:
 - Calendar features (weekday/weekend, German public holidays)
 """
 
-import numpy as np
 import pandas as pd
 
 

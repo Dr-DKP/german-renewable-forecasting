@@ -1,599 +1,254 @@
-# German Renewable Energy Forecasting Pipeline
+# German Solar Forecasting — Physics-Informed, Calibration-First
 
-**Solar & Wind Generation Prediction Using Real German Grid Data (SMARD)**
+**Probabilistic day-ahead solar generation forecasts for the German grid, where physics provides the principled baseline and machine learning learns only the residual.**
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue)](https://www.python.org/)
-[![Data Source](https://img.shields.io/badge/Data-SMARD%20Bundesnetzagentur-green)](https://www.smard.de/)
-[![Status](https://img.shields.io/badge/Status-In%20Development-yellow)]()
+[![Data](https://img.shields.io/badge/Data-SMARD%20%2B%20Open--Meteo-green)](https://www.smard.de/)
+[![Status](https://img.shields.io/badge/Status-Sprint%20in%20progress-yellow)]()
 [![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
 
-> An end-to-end forecasting system for German renewable energy generation, from data ingestion through model comparison to uncertainty-calibrated predictions. Built with the same data sources that commercial energy forecasting companies use in production.
+> Not another XGBoost-vs-LSTM comparison. This repo tackles the two things most portfolio forecasting projects skip: **physical grounding** (pvlib clear-sky + residual learning) and **calibrated uncertainty** (split conformal + CRPS + reliability diagrams). And it is run as a research project — public Kanban, ADRs, risk register, retrospectives.
 
 ---
 
 ## Table of Contents
-
-1. [Problem Statement](#1-problem-statement)
-2. [Motivation & Background](#2-motivation--background)
-3. [Data Sources](#3-data-sources)
-4. [System Architecture](#4-system-architecture)
-5. [Phased Roadmap](#5-phased-roadmap)
-6. [Model Strategy: Prophet → XGBoost → LSTM](#6-model-strategy-prophet--xgboost--lstm)
-7. [Uncertainty Quantification](#7-uncertainty-quantification)
-8. [Infrastructure & MLOps](#8-infrastructure--mlops)
-9. [Tech Stack & Rationale](#9-tech-stack--rationale)
-10. [Key Design Decisions](#10-key-design-decisions)
-11. [Project Structure](#11-project-structure)
-12. [How to Run](#12-how-to-run)
-13. [Results & Benchmarks](#13-results--benchmarks)
-14. [Lessons Learned](#14-lessons-learned)
-15. [License & Contact](#15-license--contact)
+1. [The problem](#1-the-problem)
+2. [The approach](#2-the-approach)
+3. [Data](#3-data)
+4. [Architecture](#4-architecture)
+5. [Results](#5-results)
+6. [How this repo is managed](#6-how-this-repo-is-managed)
+7. [Tech stack](#7-tech-stack)
+8. [How to run](#8-how-to-run)
+9. [Key design decisions (ADRs)](#9-key-design-decisions)
+10. [Project structure](#10-project-structure)
+11. [About the author](#11-about-the-author)
 
 ---
 
-## 1. Problem Statement
+## 1. The problem
 
-Germany's Energiewende (energy transition) targets 80% renewable electricity by 2030. The challenge: solar and wind generation are **volatile and weather-dependent**. Unlike dispatchable power plants, you cannot simply "turn up" the sun.
+Germany's Energiewende targets 80% renewables by 2030. Solar is volatile and weather-dependent; operators cannot dispatch it like a gas plant.
 
-**The operational problem for grid operators and energy traders:**
+The operational problem:
 
-- A 10% forecasting error on solar generation at peak demand costs real money in balancing energy purchases on the spot market.
-- Operators need not just a point estimate ("we expect 12 GW tomorrow at noon") but a **reliable uncertainty range** ("we expect 12 GW ± 2 GW, and here is our confidence").
-- Most open-source forecasting projects stop at RMSE metrics. This project goes further: **what does the uncertainty actually mean for an operator's decision?**
-
-This pipeline forecasts hourly solar and wind generation for Germany using publicly available SMARD data, compares three modeling approaches with increasing complexity, and outputs calibrated uncertainty estimates alongside point predictions.
+- A 10% solar forecasting error at midday peak costs real money on the balancing spot market.
+- Operators do not want a point estimate ("~12 GW at noon"). They want a **calibrated probabilistic forecast** — "12 GW ± 2 GW, 80% interval guaranteed to contain the truth 80% of the time on average."
+- Most open-source forecasting stops at RMSE. This repo measures calibration explicitly and reports it honestly.
 
 ---
 
-## 2. Motivation & Background
+## 2. The approach — physics, then residuals, then calibrated UQ
 
-### 2.1 Why This Domain
+### 2.1 Physics-informed forecasting
 
-Renewable energy forecasting sits at the intersection of physics, data science, and operational decision-making. The data is real, the stakes are tangible, and the problems are genuinely hard: seasonal patterns, weather coupling, grid events, missing data, and the need for honest uncertainty estimates.
+Instead of feeding weather into a black-box model and hoping it learns physics, we **compute the physics directly**:
 
-I chose this domain deliberately because it demands the kind of thinking I was trained in: understanding the physics driving the signal, designing systematic experiments, and treating uncertainty as a first-class output rather than an afterthought.
+- **Clear-sky irradiance** via pvlib (Ineichen-Perez model using solar position, air mass, Linke turbidity)
+- **Solar geometry** for German latitude, per-hour azimuth and elevation
+- An analytical **first-principles power estimate** as the baseline forecast
 
-### 2.2 Physics Research → Applied Forecasting
+This baseline already explains most intraday solar variance from first principles — before any ML.
 
-My PhD and postdoc work in experimental physics maps directly to this problem:
+### 2.2 Residual learning
 
-| Research Skill | Direct Mapping in This Project |
+What physics cannot predict: clouds, curtailments, measurement noise, module soiling. We train **XGBoost on the residual** (actual − physics) using SMARD generation, Open-Meteo weather, and SQL-engineered lag / rolling features. The model learns only what physics cannot — smaller, faster to train, easier to interpret.
+
+### 2.3 Calibrated probabilistic forecasts
+
+Three techniques layered:
+
+| Technique | Purpose |
 |---|---|
-| Time-resolved spectroscopy (femtosecond pump-probe) | Time-series feature engineering, lag variables, rolling statistics |
-| Fourier analysis of optical signals | Seasonal decomposition of energy data (daily, weekly, annual cycles) |
-| Uncertainty propagation in experimental measurements | Uncertainty quantification on model forecasts (prediction intervals) |
-| Experimental design and hypothesis testing | Model comparison framework with statistical validation |
-| Data pipeline automation (Python, LabVIEW) | Automated SMARD API ingestion and preprocessing |
+| **Quantile regression XGBoost** (q10/q50/q90) | Native prediction intervals, no distributional assumption |
+| **Split conformal prediction** (MAPIE) | Distribution-free coverage guarantee: 80% interval contains the truth ≥80% of the time |
+| **CRPS + reliability diagrams** | Honest evaluation of probabilistic sharpness and calibration |
 
-The domain changes; the quantitative thinking does not. I am not learning data science from scratch. I am translating a decade of scientific training into an industrial forecasting context.
-
-### 2.3 Industry Relevance
-
-This pipeline mirrors the core workflow of commercial renewable energy forecasting: ingest official grid data, build models of increasing sophistication, produce calibrated probabilistic forecasts, and deliver results through an operational interface. The tools and data sources used here (SMARD, DWD, XGBoost, conformal prediction) are the same ones used in production energy forecasting systems across the DACH region.
+This combination is standard in probabilistic-forecasting research and rare in portfolio projects.
 
 ---
 
-## 3. Data Sources
+## 3. Data
 
-### Primary: SMARD (Bundesnetzagentur)
+### SMARD — Bundesnetzagentur
+[https://www.smard.de/en](https://www.smard.de/en) — Germany's official grid data platform. Hourly solar generation, load, prices. Public REST API, no key required. **The same source that commercial forecasters in DACH work with daily.**
 
-**URL:** [https://www.smard.de/en](https://www.smard.de/en)
+### Open-Meteo
+[https://open-meteo.com](https://open-meteo.com) — Free historical + forecast weather. Shortwave radiation, cloud cover, temperature at Offenbach (DWD reference station for Germany).
 
-SMARD (Strommarktdaten) is Germany's official electricity market data platform, operated by the Federal Network Agency. It provides:
-
-- Hourly generation by source (solar, wind onshore, wind offshore, hydro, biomass, nuclear, coal, gas)
-- Electricity consumption (actual and forecasted)
-- Import/export to neighboring countries
-- Spot market prices (EPEX)
-
-**Why SMARD specifically?**
-
-1. **It's what industry uses.** The same data source that commercial forecasting providers work with.
-2. **It has real-world messiness:** missing hours, outliers from grid events, DST transitions, public holiday effects. These are exactly the preprocessing challenges encountered in production.
-3. **It's publicly documented and legally free.** Reproducible by anyone who reads this README.
-4. **It has a REST API.** This forces a real data ingestion pipeline, not just a CSV download.
-
-### Secondary: DWD (Deutscher Wetterdienst, Phase 2)
-
-Solar and wind generation are physically driven by weather. A forecasting model that ignores weather is only extrapolating historical patterns; one that includes weather can respond to predicted conditions.
-
-**DWD Open Data:** [https://opendata.dwd.de/](https://opendata.dwd.de/)
-
-Features to extract:
-- Solar irradiance (GHI, Global Horizontal Irradiance)
-- Wind speed at 10m and 100m heights
-- Cloud cover
-- Temperature (affects solar panel efficiency, a detail most tutorials ignore)
-
-> **Scope note:** Phase 1 builds a solid baseline using SMARD data alone. Weather feature integration is Phase 2. This is deliberate: establish what the historical pattern alone can predict before adding external covariates.
+Both land in **TimescaleDB hypertables** for partitioned time-range queries.
 
 ---
 
-## 4. System Architecture
-
-The pipeline is designed in four independent stages. Each stage has clear inputs, outputs, and can be tested and replaced without affecting the others.
+## 4. Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   DATA INGESTION LAYER                  │
-│                                                         │
-│  SMARD API ──► Raw JSON ──► Validated Parquet Files     │
-│  DWD API   ──► Raw CSV  ──►  (data/raw/)                │
-└─────────────────────────┬───────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────┐
-│               FEATURE ENGINEERING LAYER                 │
-│                                                         │
-│  ► Temporal features (hour, day, week, month, season)   │
-│  ► Lag features (t-1h, t-24h, t-168h)                   │
-│  ► Rolling statistics (mean, std, 24h/7d windows)       │
-│  ► Fourier terms (daily & annual seasonality)           │
-│  ► Weather coupling (Phase 2)                           │
-└─────────────────────────┬───────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────┐
-│                  MODELING LAYER                         │
-│                                                         │
-│  Model 1: Prophet  ──────────────────────────┐          │
-│  Model 2: XGBoost  ──────────────────────────┤──► UQ    │
-│  Model 3: LSTM     ──────────────────────────┘  layer   │
-│                                                         │
-│  Evaluation: RMSE, MAE, MAPE, Coverage, Sharpness       │
-└─────────────────────────┬───────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────────┐
-│               DEPLOYMENT & VISUALIZATION LAYER          │
-│                                                         │
-│  Streamlit Dashboard ──► Interactive forecast viewer    │
-│  MLflow Tracking    ──► Experiment log & model registry │
-│  FastAPI Endpoint   ──► /predict REST API (Phase 4)     │
-└─────────────────────────────────────────────────────────┘
+          SMARD API                      Open-Meteo API
+              │                               │
+              ▼                               ▼
+   ┌─────────────────────────────────────────────────┐
+   │     TimescaleDB hypertables (raw layer)         │
+   └─────────────────────────────────────────────────┘
+                         │
+                         ▼
+   ┌─────────────────────────────────────────────────┐
+   │   SQL feature views: lag, rolling, time joins   │
+   └─────────────────────────────────────────────────┘
+                         │
+           ┌─────────────┴─────────────┐
+           ▼                           ▼
+   ┌──────────────────┐      ┌───────────────────────┐
+   │ PHYSICS LAYER    │      │ RESIDUAL LAYER        │
+   │ pvlib clear-sky  │──────│ XGBoost on residual   │
+   │ solar position   │      │ (actual − physics)    │
+   └──────────────────┘      └───────────────────────┘
+                         │
+                         ▼
+   ┌─────────────────────────────────────────────────┐
+   │ CALIBRATED UQ                                   │
+   │ quantile + split conformal + CRPS + reliability │
+   └─────────────────────────────────────────────────┘
+                         │
+             ┌───────────┴────────────┐
+             ▼                        ▼
+        FastAPI /forecast     Streamlit dashboard
+        (→ P3 Tool D)         (public demo)
 ```
 
-### Architectural principle: modularity over monolith
+---
 
-Each stage is a separate Python module. A broken API response in ingestion does not corrupt the modeling layer. Models can be swapped without touching the dashboard. This is a systems engineering principle, designed for maintainability and independent testing of each component.
+## 5. Results
+
+*Live-updated as each phase completes. Weekly reports in [`docs/pm/weekly/`](docs/pm/weekly/).*
+
+### Headline numbers (target)
+| Metric | Naive persistence | Prophet baseline | Physics-only | **Physics + XGBoost + Conformal** |
+|---|---|---|---|---|
+| MAPE (%) | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
+| CRPS | _tbd_ | _tbd_ | _tbd_ | _tbd_ |
+| 80% empirical coverage | — | _tbd_ | — | target ∈ [78%, 82%] |
+
+### What the ablation teaches
+*Updated after each phase retrospective.*
 
 ---
 
-## 5. Phased Roadmap
+## 6. How this repo is managed
 
-Building incrementally with working deliverables at each phase. Each phase has a clear exit criterion.
+This project is run as a **22-day research sprint** with PM artifacts a recruiter can audit:
 
-### Phase 0: Setup & Data Exploration (Week 1) - *Current*
+- 📋 **Kanban:** [`docs/pm/kanban.md`](docs/pm/kanban.md) — daily state of work
+- 📜 **Architecture Decision Records:** [`docs/pm/decisions/`](docs/pm/decisions/) — every judgement call, documented
+- ⚠️ **Risk register:** [`docs/pm/risk-register.md`](docs/pm/risk-register.md) — risks identified + mitigated over time
+- 📅 **Weekly reports:** [`docs/pm/weekly/`](docs/pm/weekly/) — committed vs delivered, blockers, metrics
+- 🔄 **Retrospectives:** [`docs/pm/retros/`](docs/pm/retros/) — Start / Stop / Continue after each phase
+- 📚 **Wiki:** [`docs/wiki/`](docs/wiki/) — technical notes on methods, tools, and design choices made during the build
 
-**Goal:** Understand the data before touching a model.
-
-- [ ] Set up project environment (conda/venv, `requirements.txt`)
-- [ ] Implement SMARD API client (`src/data/smard_client.py`)
-- [ ] Download historical solar + wind data (2018–2025)
-- [ ] Exploratory Data Analysis notebook (`notebooks/01_eda.ipynb`)
-  - Daily/weekly/seasonal patterns
-  - Missing value analysis
-  - Outlier identification (grid events, data gaps)
-  - Autocorrelation structure (ACF/PACF plots)
-- [ ] Document findings: what does the data tell us before modeling?
-
-**Exit criterion:** EDA notebook complete, patterns understood, data quality issues documented.
+This is what scientific project management looks like, applied to industrial AI.
 
 ---
 
-### Phase 1: Baseline Model, Prophet (Week 2)
+## 7. Tech stack
 
-**Goal:** Build the simplest reasonable forecast. Beat this before getting clever.
-
-- [ ] Train/validation/test split (time-based, no random shuffling)
-- [ ] Prophet model for solar generation
-- [ ] Prophet model for wind generation (onshore + offshore)
-- [ ] Baseline evaluation: RMSE, MAE, MAPE
-- [ ] Prophet's built-in uncertainty intervals: are they calibrated?
-- [ ] Residual analysis: where does the model fail?
-
-**Why Prophet first?**
-Prophet handles seasonality, holidays, and trend changepoints with minimal tuning. It provides a credible baseline with uncertainty bands out of the box. If XGBoost outperforms it later, the improvement is meaningful because we compared against something reasonable, not a naive mean.
-
-**Exit criterion:** Working Prophet forecast with documented metrics and failure modes.
-
----
-
-### Phase 2: Gradient Boosting, XGBoost (Week 3)
-
-**Goal:** Feature-engineered model that captures nonlinear relationships.
-
-- [ ] Feature engineering pipeline (`src/features/engineer.py`)
-  - Temporal embeddings (cyclic encoding of hour, day, month)
-  - Lag features (24h, 48h, 168h)
-  - Rolling statistics
-  - Calendar features (weekday vs weekend, German public holidays)
-  - Weather covariates (DWD integration)
-- [ ] XGBoost training with cross-validation
-- [ ] SHAP feature importance analysis: what drives the forecast?
-- [ ] Conformal prediction for calibrated uncertainty intervals
-- [ ] Comparison with Prophet baseline on all metrics
-
-**Why XGBoost second?**
-XGBoost with engineered features often outperforms Prophet because it can use richer input signals. It also integrates naturally with SHAP for explainability, which is critical for operators who need to trust predictions.
-
-**Exit criterion:** XGBoost beats Prophet on at least RMSE and MAE. SHAP analysis identifies top predictive features.
-
----
-
-### Phase 3: Sequential Model, LSTM (Week 4)
-
-**Goal:** Test whether deep learning adds value on top of classical methods.
-
-- [ ] LSTM architecture design (input window, hidden units, dropout)
-- [ ] Training with PyTorch
-- [ ] MC Dropout for uncertainty estimation
-- [ ] Comparison with XGBoost: honest assessment
-- [ ] When does LSTM win? When does it lose?
-
-**Why LSTM third?**
-LSTM captures long-range temporal dependencies without manual feature engineering. But it requires more data, more compute, and is harder to interpret. The honest question: does it actually outperform XGBoost here? If XGBoost wins, the results will say so. This project values honesty over narrative.
-
-**Exit criterion:** LSTM trained and evaluated. Clear documentation of when it helps and when it doesn't.
-
----
-
-### Phase 4: Deployment & Productionization (Week 5)
-
-**Goal:** A working demo with operational infrastructure.
-
-- [ ] Streamlit dashboard
-  - Select date range and energy source
-  - View forecast with uncertainty bands
-  - Compare model outputs side-by-side
-  - Show SHAP plot for selected time window
-- [ ] FastAPI endpoint for programmatic access (`/predict`)
-- [ ] MLflow experiment tracking integrated throughout
-- [ ] CI pipeline (GitHub Actions: lint, test, type-check)
-- [ ] Docker containerization for reproducible deployment
-- [ ] Deploy to Streamlit Cloud or HuggingFace Spaces
-
-**Exit criterion:** Public link to interactive demo. Reproducible from clone to running dashboard.
-
----
-
-## 6. Model Strategy: Prophet → XGBoost → LSTM
-
-This progression reflects a disciplined modeling philosophy: **start simple, add complexity only when simpler methods fail, and document why.**
-
-### The Comparison Framework
-
-Every model is evaluated on the same held-out test set (2024–2025 data) using:
-
-| Metric | What It Measures | Why It Matters |
+| Layer | Tool | Why |
 |---|---|---|
-| **RMSE** | Average error magnitude, penalizes large errors | Grid operators need to avoid large forecast misses |
-| **MAE** | Average absolute error | Interpretable in GWh, directly tied to balancing costs |
-| **MAPE** | Percentage error | Comparable across different energy sources and scales |
-| **Coverage** | % of actuals within prediction interval | Calibration: are the uncertainty bands honest? |
-| **Sharpness** | Width of prediction intervals | Tight AND accurate intervals are more useful than wide safe ones |
-| **Naive baseline** | Predict tomorrow = today | A model that can't beat this has no operational value |
-
-### Why Uncertainty Metrics Alongside Accuracy
-
-Most tutorials report only RMSE. But an operator does not care that "on average we're off by 1.2 GWh." They care: "If I commit to buying 10 GWh of balancing energy, what is the probability I actually need more than that?"
-
-Prediction intervals answer this, but only if they are **calibrated** (the 80% interval actually contains the truth 80% of the time). This project measures calibration explicitly.
+| Storage | PostgreSQL 16 + TimescaleDB | Plain Postgres underneath; hypertables for fast time-range queries |
+| Data | SMARD REST API, Open-Meteo REST API | Real industry data, zero synthetic |
+| Physics | pvlib | Community reference for solar PV modeling |
+| ML | XGBoost | Best-in-class on tabular residuals |
+| UQ | MAPIE, properscoring | Split conformal + CRPS |
+| MLOps | MLflow (file backend) | Experiment tracking without server overhead |
+| API | FastAPI + Pydantic | Typed, auto-docs, production-credible |
+| UI | Streamlit + Plotly | Interactive demo, no frontend cost |
+| Deploy | Docker + docker-compose | One-command spin-up |
+| CI | GitHub Actions | ruff + pytest on every push |
 
 ---
 
-## 7. Uncertainty Quantification
+## 8. How to run
 
-In experimental physics, reporting a result without an uncertainty is incomplete science. You don't write "the peak is at 785 nm." You write "785 ± 3 nm (1σ)," and you explain where the uncertainty comes from.
+### Prerequisites
+- Docker Desktop (or Docker Engine)
+- Git
 
-This instinct transfers directly to energy forecasting.
+### One-command startup
 
-**Three approaches to uncertainty in this project:**
+```bash
+git clone https://github.com/DR-DKP/german-renewable-forecasting.git
+cd german-renewable-forecasting
+docker compose up --build
+```
 
-### 7.1 Prophet: Built-in Bayesian Uncertainty
+Then:
+- Dashboard → http://localhost:8501
+- API docs → http://localhost:8000/docs
+- MLflow UI → http://localhost:5000
 
-Prophet uses a generative model with uncertainty propagated from trend and seasonality estimates. The intervals come "for free," but they must be validated against actual coverage on the test set. Out-of-the-box Prophet intervals tend to be overconfident.
+### For local development
 
-### 7.2 XGBoost: Conformal Prediction
-
-Conformal prediction is a distribution-free method that converts any point forecast into a statistically valid prediction interval. It guarantees that the 90% interval contains the true value at least 90% of the time, without assumptions about error distribution.
-
-Implementation: calibrate residuals from a validation set, then apply empirical quantiles to test predictions. See `src/uncertainty/conformal.py`.
-
-### 7.3 LSTM: Monte Carlo Dropout
-
-MC Dropout treats dropout layers as approximate Bayesian inference. By keeping dropout active at inference time and running multiple forward passes, we get a distribution of predictions, from which we extract calibrated intervals.
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+docker compose up timescaledb        # just the DB
+jupyter lab                          # work in notebooks/
+```
 
 ---
 
-## 8. Infrastructure & MLOps
+## 9. Key design decisions
 
-Since this is a forecasting **system** (not just a model), infrastructure design matters. This section documents the operational thinking behind the pipeline.
+Full ADRs in [`docs/pm/decisions/`](docs/pm/decisions/). Headlines:
 
-### 8.1 Data Pipeline
-
-```
-SMARD API ──► Rate-limited fetcher ──► Raw JSON cache ──► Parquet (columnar storage)
-                  │                         │
-                  ▼                         ▼
-          Retry logic with           Schema validation
-          exponential backoff        (null checks, dtype enforcement,
-                                      timestamp continuity)
-```
-
-- **Parquet over CSV**: columnar storage, 5-10x compression, native datetime support, schema enforcement
-- **Idempotent ingestion**: re-running the pipeline doesn't duplicate data
-- **Incremental updates**: fetch only new data since last ingestion timestamp
-
-### 8.2 Experiment Tracking (MLflow)
-
-Every training run logs:
-- Hyperparameters
-- All evaluation metrics (point forecast + uncertainty)
-- Model artifacts
-- Data version (date range, feature set hash)
-- Training duration and environment info
-
-This makes experiments **reproducible** and **comparable**. No more "which notebook produced that result?"
-
-### 8.3 Testing Strategy
-
-| Layer | What's Tested | Tool |
-|---|---|---|
-| Data ingestion | API response parsing, schema validation, edge cases (DST, missing hours) | pytest |
-| Feature engineering | Correct lag alignment, no future leakage, cyclic encoding range | pytest |
-| Models | Training completes, predictions have correct shape, UQ intervals are valid | pytest |
-| Integration | End-to-end: raw data → features → prediction → evaluation metrics | pytest |
-
-### 8.4 CI/CD Pipeline (GitHub Actions)
-
-```yaml
-on: [push, pull_request]
-jobs:
-  quality:
-    - ruff check (linting)
-    - ruff format --check (formatting)
-    - pytest tests/ -v (unit + integration tests)
-  # Future: automated model validation on data refresh
-```
-
-### 8.5 Deployment Architecture (Phase 4)
-
-```
-GitHub repo ──► GitHub Actions (CI) ──► Docker image ──► Streamlit Cloud
-                                                         or HuggingFace Spaces
-                                    ──► FastAPI container ──► /predict endpoint
-```
-
-- **Containerized**: Docker ensures "works on my machine" doesn't happen
-- **Stateless API**: FastAPI endpoint takes a date range, returns forecast + intervals as JSON
-- **Dashboard**: Streamlit for interactive exploration, not production serving
-
-### 8.6 Future Infrastructure Considerations
-
-These are not in scope for the initial build, but documented as next steps:
-
-- **Scheduled retraining**: Cron or Airflow DAG to retrain models weekly on fresh SMARD data
-- **Model monitoring**: Track prediction drift over time. Does accuracy degrade as generation patterns shift?
-- **Data quality alerts**: Automated checks when SMARD data has unexpected gaps or anomalies
-- **A/B model serving**: Route a fraction of predictions to a challenger model for live comparison
+- **[ADR-000 — Deliberate scope](docs/pm/decisions/ADR-000-scope.md):** solar only, DE aggregate, no LSTM, no wind in v1.
+- **ADR-001 — Physics-informed residual learning:** why pvlib + XGBoost on residuals, not just XGBoost on weather.
+- **ADR-002 — TimescaleDB over Parquet:** why a DB is worth the infra overhead.
+- **ADR-003 — Split conformal over bootstrap:** distribution-free guarantees.
+- **ADR-004 — API contract for P3 compatibility.**
 
 ---
 
-## 9. Tech Stack & Rationale
-
-Every tool is here for a reason. This is a minimal, purposeful selection.
-
-| Tool | Purpose | Why This and Not X |
-|---|---|---|
-| **Python 3.11** | Core language | Standard in data science; type hints improve code clarity |
-| **SMARD API** | Data ingestion | Official source, mirrors industry workflow |
-| **Pandas** | Data manipulation | Ecosystem maturity; Polars as optimization if needed |
-| **Prophet** | Baseline forecasting | Interpretable, handles seasonality, built-in UQ |
-| **XGBoost** | Main model | Production-proven on tabular time-series; excellent with SHAP |
-| **SHAP** | Explainability | Makes models interpretable, necessary for operator trust |
-| **PyTorch** | LSTM implementation | Industry standard for deep learning research |
-| **MAPIE** | Conformal prediction | Scikit-learn compatible, well-documented |
-| **MLflow** | Experiment tracking | Reproducible experiments, model registry |
-| **Streamlit** | Demo interface | Fast to deploy, interactive, no frontend expertise needed |
-| **FastAPI** | REST API | Async, auto-docs, production-ready |
-| **pytest** | Testing | Data pipeline and feature engineering validation |
-| **ruff** | Linting & formatting | Fast, replaces flake8 + black + isort |
-| **GitHub Actions** | CI pipeline | Auto-run tests and linting on every push |
-| **Docker** | Containerization | Reproducible deployment across environments |
-
-**Deliberately excluded (for now):**
-- **Airflow/Prefect**: Overkill for a single-pipeline project at this stage
-- **Kubernetes**: No need for orchestration until serving at scale
-- **Feature store**: Direct feature engineering is sufficient for this scope
-
----
-
-## 10. Key Design Decisions
-
-These are the choices where I made a judgment call, with the reasoning documented.
-
-### Decision 1: Time-based train/test split, never random
-
-**Chosen approach:** Train on 2018–2023, validate on 2024, test on 2025.
-
-**Why not random split?** Time-series data has temporal structure. A random split lets the model "see the future" during training (data leakage), producing optimistically biased metrics that don't generalize. This is a common mistake this project deliberately avoids.
-
-### Decision 2: Forecast horizon of 24 hours
-
-**Chosen approach:** Predict the next 24 hours from the last known observation.
-
-**Why 24h?** This matches the day-ahead electricity market (EPEX day-ahead auction closes at noon for the next day). It is the operationally relevant horizon. 15-minute resolution is the industry standard; hourly is the starting point here, with sub-hourly as a stretch goal.
-
-### Decision 3: Separate models for solar and wind
-
-**Chosen approach:** Train independent models for solar generation and wind generation.
-
-**Why not a joint model?** Solar and wind have fundamentally different physical drivers (irradiance vs. wind speed), different seasonal profiles, and different time-of-day patterns. A joint model conflates these signals. Separate models are more interpretable and easier to debug and improve independently.
-
-### Decision 4: Evaluate calibration, not just accuracy
-
-**Chosen approach:** Coverage and sharpness metrics alongside RMSE/MAE.
-
-**Why?** An 80% prediction interval that contains the true value only 60% of the time is dangerously misleading. Operators would under-hedge their risk. Calibration is the difference between a forecast and a **reliable** forecast.
-
-### Decision 5: Parquet over CSV for data storage
-
-**Chosen approach:** Store processed data as Parquet files.
-
-**Why?** Parquet provides columnar compression (5-10x smaller files), preserves dtypes (no datetime parsing on every load), and supports schema enforcement. For time-series data with millions of rows, this matters.
-
----
-
-## 11. Project Structure
+## 10. Project structure
 
 ```
 german-renewable-forecasting/
-│
-├── data/
-│   ├── raw/                    # Raw API responses (git-ignored)
-│   ├── processed/              # Cleaned, feature-engineered datasets
-│   └── external/               # DWD weather data (Phase 2)
-│
-├── notebooks/
-│   ├── 01_eda.ipynb            # Exploratory Data Analysis
-│   ├── 02_prophet_baseline.ipynb
-│   ├── 03_xgboost_model.ipynb
-│   └── 04_lstm_model.ipynb
-│
-├── src/
-│   ├── data/
-│   │   ├── smard_client.py     # SMARD API wrapper
-│   │   └── dwd_client.py       # DWD weather data client (Phase 2)
-│   ├── features/
-│   │   └── engineer.py         # Feature engineering pipeline
-│   ├── models/
-│   │   ├── prophet_model.py    # Prophet baseline
-│   │   ├── xgboost_model.py    # XGBoost + SHAP
-│   │   └── lstm_model.py       # LSTM + MC Dropout
-│   ├── evaluation/
-│   │   └── metrics.py          # RMSE, MAE, MAPE, Coverage, Sharpness
-│   └── uncertainty/
-│       └── conformal.py        # Conformal prediction intervals
-│
-├── app/
-│   └── streamlit_app.py        # Interactive dashboard
-│
-├── tests/
-│   ├── test_smard_client.py    # Data ingestion tests
-│   ├── test_features.py        # Feature engineering tests
-│   └── test_metrics.py         # Evaluation metrics tests
-│
-├── models/
-│   └── saved/                  # Trained model artifacts (git-ignored)
-│
-├── mlruns/                     # MLflow tracking (git-ignored)
-│
+├── README.md                      # You are here
+├── docker-compose.yml
+├── Dockerfile.api
+├── Dockerfile.dashboard
 ├── requirements.txt
 ├── environment.yml
-├── .gitignore
-├── LICENSE
-└── README.md
+├── api/               main.py     # FastAPI /forecast + /health
+├── app/               streamlit_app.py
+├── src/
+│   ├── data/          # SMARD + Open-Meteo clients
+│   ├── features/      # SQL views + dataset assembly
+│   ├── physics/       # pvlib clear-sky + solar geometry
+│   ├── models/        # Residual XGBoost + quantile variants
+│   ├── uncertainty/   # Conformal prediction wrappers
+│   └── evaluation/    # CRPS, reliability diagrams, metrics
+├── notebooks/         # 01 ingestion … 05 UQ evaluation
+├── tests/             # pytest: data, features, models, API
+├── docs/
+│   ├── pm/            # Kanban, ADRs, risk register, weekly, retros
+│   ├── wiki/          # Concept notes + debugging + interview prep
+│   └── blog/          # Write-up drafts
+└── data/              # Raw / processed (git-ignored)
 ```
 
 ---
 
-## 12. How to Run
+## 11. About the author
 
-### Prerequisites
+**Dr. Deepak K. Pandey** — physicist transitioning into industrial AI. 10 years of experimental physics (femtosecond spectroscopy, UHV systems, uncertainty propagation); now applying that discipline to renewable-energy forecasting and agentic AI systems.
 
-- Python 3.11+
-- Conda or virtualenv
-
-### Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/Dr-DKP/german-renewable-forecasting.git
-cd german-renewable-forecasting
-
-# Create and activate environment
-conda env create -f environment.yml
-conda activate energy-forecasting
-
-# Or with pip
-pip install -r requirements.txt
-```
-
-### Fetch Data
-
-```bash
-# Download SMARD solar and wind data (2018–2025)
-python src/data/smard_client.py --start 2018-01-01 --end 2025-12-31 --source solar wind
-```
-
-### Run Notebooks in Order
-
-```bash
-jupyter lab
-# Open notebooks/ in sequence: 01 → 02 → 03 → 04
-```
-
-### Launch Dashboard
-
-```bash
-streamlit run app/streamlit_app.py
-```
-
-### Run Tests
-
-```bash
-pytest tests/ -v
-```
-
-### Track Experiments
-
-```bash
-mlflow ui
-# Open http://localhost:5000
-```
+- Website: [drdkp.com](https://drdkp.com)
+- LinkedIn: [linkedin.com/in/drdkp](https://linkedin.com/in/drdkp)
+- Companion projects:
+  - **P1** — Predictive Maintenance on NASA C-MAPSS — *(separate repo: industrial-systems-monitoring)*
+  - **P3** — Sensor Intelligence Assistant (LLM agent) — *(coming May 2026)*
 
 ---
 
-## 13. Results & Benchmarks
+**MIT License.** See [LICENSE](LICENSE).
 
-*To be completed as models are trained and validated.*
-
-### Model Comparison Table
-
-| Model | RMSE (GWh) | MAE (GWh) | MAPE (%) | Coverage (80%) | Sharpness |
-|---|---|---|---|---|---|
-| Naive (24h lag) | - | - | - | - | - |
-| Prophet | - | - | - | - | - |
-| XGBoost | - | - | - | - | - |
-| LSTM | - | - | - | - | - |
-
-> The naive baseline (predict tomorrow = today) is always included. A model that cannot beat it has no operational value.
-
-### Key Findings
-
-*To be updated after each phase completion.*
-
----
-
-## 14. Lessons Learned
-
-*Updated throughout the project as discoveries are made.*
-
-- **SMARD API quirks:** The API returns data in 15-minute resolution for some endpoints and hourly for others. Alignment requires careful resampling logic.
-- **Solar forecasting at night:** Solar generation is exactly zero from ~19:00 to ~06:00 seasonally. Models that don't account for this produce nonsensical overnight predictions. Zero-inflation handling is essential.
-- **Prophet calibration:** Prophet's default uncertainty intervals tend to be overconfident (too narrow). Requires tuning `interval_width` and validating coverage empirically.
-
----
-
-## 15. License & Contact
-
-**MIT License**, see [LICENSE](LICENSE) for details.
-
-**Author:** Dr. Deepak K. Pandey
-**Website:** [drdkp.com](https://drdkp.com)
-**LinkedIn:** [linkedin.com/in/drdkp](https://linkedin.com/in/drdkp)
-
----
-
-*Built with genuine interest in renewable energy forecasting and a physicist's instinct for systematic, uncertainty-aware problem solving.*
+*Built as a focused portfolio sprint — April–May 2026.*

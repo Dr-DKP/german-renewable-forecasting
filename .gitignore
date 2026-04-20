@@ -38,6 +38,13 @@ mlartifacts/
 .DS_Store
 Thumbs.db
 
+# Internal — planning docs, unrelated files
+CLAUDE.md
+P2_Energy_Forecasting.md
+p1_finalization+p3_planning.md
+career-anchor.jsx
+docs/wiki/
+
 # Environment files
 .env
 .env.local
@@ -53,3 +60,4 @@ models/saved/
 *.h5
 *.pt
 *.pth
+.vene/

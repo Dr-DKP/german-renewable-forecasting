@@ -1,0 +1,39 @@
+name: CI  # label shown on GitHub's Actions tab
+
+on:             # "on" = what event triggers this workflow
+  push:         # trigger on every git push...
+    branches:
+      - main    # ...but only to the main branch
+  pull_request: # also trigger when a PR is opened against main
+    branches:
+      - main
+
+jobs:
+  lint-and-test:          # job name (arbitrary, shown in GitHub UI)
+    runs-on: ubuntu-latest  # which OS to spin up (GitHub provides this VM for free)
+
+    steps:
+      # Step 1: download your repo code onto the VM
+      - name: Checkout code
+        uses: actions/checkout@v4  # pre-built action: does `git clone` on the runner
+
+      # Step 2: install a specific Python version on the VM
+      - name: Set up Python
+        uses: actions/setup-python@v5  # pre-built action: installs Python
+        with:
+          python-version: "3.11"       # pin the version so CI is reproducible
+
+      # Step 3: install only what CI needs (not torch/mlflow — too slow)
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip               # ensure pip itself is current
+          pip install ruff pytest psycopg2-binary # only the tools CI actually uses
+
+      # Step 4: lint — ruff reads code without running it, flags style errors
+      - name: Lint with ruff
+        run: ruff check .  # checks all .py files in the repo
+
+      # Step 5: run only tests that do NOT need a live database
+      # test_smoke.py needs localhost:5432 (our Docker container) — not available in CI
+      - name: Run tests (no-db only)
+        run: pytest tests/ --ignore=tests/test_smoke.py -v

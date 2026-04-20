@@ -1,7 +1,7 @@
 """Tests for evaluation metrics."""
 
 import numpy as np
-from src.evaluation.metrics import rmse, mae, mape, coverage, sharpness
+from src.evaluation.metrics import rmse, mae, coverage, sharpness
 
 
 def test_rmse_perfect():
