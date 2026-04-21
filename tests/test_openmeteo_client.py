@@ -7,7 +7,6 @@ and has all 4 weather columns.
 
 # Import libraries
 import pandas as pd
-import pytest
 from src.data.openmeteo_client import fetch_weather
 
 

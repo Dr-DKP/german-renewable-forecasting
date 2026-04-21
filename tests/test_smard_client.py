@@ -7,7 +7,6 @@ fetch_solar_generation(start,end): result is sorted by time? Dates are within th
 
 # Import libraries
 import pandas as pd
-import pytest 
 from src.data.smard_client import get_available_timestamps, fetch_chunk, fetch_solar_generation
 
 def test_timestamps_returns_a_list():
