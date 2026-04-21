@@ -24,7 +24,7 @@ def get_available_timestamps() -> list[int]:
     response = requests.get(url)
     # verify the successful request
     if response.status_code != 200:
-        raise Exception(f"Failed to fatch data: Status{response.status_code}")
+        raise Exception(f"Failed to fetch data: Status {response.status_code}")
     
     # parse json and return the specific key
     data = response.json()
@@ -45,7 +45,7 @@ def fetch_chunk(timestamp_ms: int) -> pd.DataFrame:
     # build DataFrame that converts ms timestamps to timestamps and solar_mw
     df = pd.DataFrame(raw_data, columns=["time", "solar_mw"])
     # cleaning data
-    df["time"] = pd.DataFrame(df["time"], unit='ms', utc = True)
+    df["time"] = pd.to_datetime(df["time"], unit='ms', utc = True)
 
     # get final dat
     return df
@@ -57,8 +57,8 @@ def fetch_solar_generation(start: str, end: str) -> pd.DataFrame:
     Returned concatenated DataFrame sorted by time and filtered with start and end.
     """
     # define start and end dates
-    start_dt = pd.DataFrame(start, utc=True)
-    end_dt = pd.DataFrame(end, utc=True)
+    start_dt = pd.Timestamp(start, tz="UTC")
+    end_dt = pd.Timestamp(end, tz="UTC")
     # get the index of available weeks
     all_weeks = get_available_timestamps()
     # filter list and fetch data
