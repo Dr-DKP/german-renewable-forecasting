@@ -32,9 +32,9 @@
 - [x] D2.4 — First concept note `01-hypertables.md`
 
 ### Phase 1 — Data Foundation (Days 3-5) — *unpacked as Phase 0 closes*
-- [ ] SMARD client
-- [ ] Open-Meteo client
-- [ ] Notebook 01 ingestion + sanity checks
+- [x] SMARD client
+- [x] Open-Meteo client
+- [x] Notebook 01 ingestion + sanity checks
 
 ### Phase 2 — EDA + Physics Baseline (Days 6-8) — *unpacked later*
 - [ ] EDA notebook 02
