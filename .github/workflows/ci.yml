@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install ruff pytest psycopg2-binary numpy  # numpy needed by test_metrics.py
+          pip install ruff pytest psycopg2-binary numpy pandas requests  # numpy pandas requests needed by test_metrics.py test_openmeteo_client.py test smard_client.py
 
       # Step 4: lint — ruff reads code without running it, flags style errors
       - name: Lint with ruff
