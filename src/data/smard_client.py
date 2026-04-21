@@ -1,5 +1,5 @@
 """
-SMARD API Client — Bundesnetzagentur electricity market data.
+SMARD API Client: Bundesnetzagentur electricity market data.
 
 Fetches hourly generation data (solar, wind onshore, wind offshore)
 from Germany's official Strommarktdaten platform.
