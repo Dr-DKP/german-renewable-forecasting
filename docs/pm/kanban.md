@@ -71,7 +71,7 @@
 
 ## 🏃 In Progress
 
-- Phase 1 — SMARD client (`src/data/smard_client.py`) — written, needs live API test
+- Phase 2 — EDA notebook (`notebooks/02_eda.ipynb`) — starts Day 4
 
 ---
 
@@ -87,6 +87,13 @@
   - Repo public on GitHub, docker-compose + TimescaleDB running
   - smoke test passing locally, CI green on GitHub Actions
   - wiki notes 01–07 written, requirements fixed, README cleaned
+
+- **Phase 1 — Data Foundation** — completed 2026-04-21
+  - `src/data/smard_client.py` — live API tested, tz bug fixed
+  - `src/data/openmeteo_client.py` — built and tested
+  - `tests/test_smard_client.py` + `tests/test_openmeteo_client.py` — CI green
+  - `notebooks/01_ingestion.ipynb` — 3 years pulled, diurnal pattern confirmed, SMARD 2MW floor noted
+  - wiki note 08-rest-apis.md written
 
 ---
 
