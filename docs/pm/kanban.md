@@ -71,7 +71,7 @@
 
 ## 🏃 In Progress
 
-- Phase 2 — EDA notebook (`notebooks/02_eda.ipynb`) — starts Day 4
+- Phase 2 — pvlib clear-sky module (`src/physics/clear_sky.py`) + Notebook 03 physics baseline
 
 ---
 
@@ -87,6 +87,12 @@
   - Repo public on GitHub, docker-compose + TimescaleDB running
   - smoke test passing locally, CI green on GitHub Actions
   - wiki notes 01–07 written, requirements fixed, README cleaned
+
+- **Phase 2 — EDA notebook** — completed 2026-04-23
+  - Monthly/hourly patterns confirmed, cloud cover scatter, radiation scatter
+  - pvlib clear-sky GHI computed, scaling factor = 37.5 MW per W/m²
+  - Residual formula visualised on July 2023 week
+  - wiki note 09-clear-sky-irradiance.md written
 
 - **Phase 1 — Data Foundation** — completed 2026-04-21
   - `src/data/smard_client.py` — live API tested, tz bug fixed
