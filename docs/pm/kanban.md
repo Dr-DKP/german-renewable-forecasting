@@ -71,7 +71,7 @@
 
 ## 🏃 In Progress
 
-- Phase 3 — Feature engineering (`src/features/feature_view.py`) + training matrix
+- Phase 4 -- Calibrated UQ (quantile XGBoost + conformal prediction + CRPS)
 
 ---
 
@@ -88,7 +88,14 @@
   - smoke test passing locally, CI green on GitHub Actions
   - wiki notes 01–07 written, requirements fixed, README cleaned
 
-- **Phase 2 — Physics Baseline** — completed 2026-04-23
+- **Phase 3 -- Features + XGBoost Residual** -- completed 2026-04-27
+  - `src/features/feature_view.py` -- lag, rolling, time encoding features
+  - `src/data/training_matrix.py` -- assembles X (26,279 x 6) and y (residual)
+  - `notebooks/04_xgboost_residual.ipynb` -- R²=0.92, MAE=1,552 MW (vs physics R²=0.78)
+  - `docs/pm/decisions/ADR-002` written
+  - wiki note 10-xgboost-residual-learning.md written
+
+- **Phase 2 -- Physics Baseline** -- completed 2026-04-23
   - `src/physics/clear_sky.py` — pvlib Ineichen-Perez, SCALING_FACTOR=37.5
   - `tests/test_clear_sky.py` — 3 tests, CI green
   - `notebooks/03_physics_baseline.ipynb` — R²=0.78, MAE=3856 MW
