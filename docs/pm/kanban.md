@@ -71,7 +71,7 @@
 
 ## 🏃 In Progress
 
-- Phase 2 — pvlib clear-sky module (`src/physics/clear_sky.py`) + Notebook 03 physics baseline
+- Phase 3 — Feature engineering (`src/features/feature_view.py`) + training matrix
 
 ---
 
@@ -87,6 +87,13 @@
   - Repo public on GitHub, docker-compose + TimescaleDB running
   - smoke test passing locally, CI green on GitHub Actions
   - wiki notes 01–07 written, requirements fixed, README cleaned
+
+- **Phase 2 — Physics Baseline** — completed 2026-04-23
+  - `src/physics/clear_sky.py` — pvlib Ineichen-Perez, SCALING_FACTOR=37.5
+  - `tests/test_clear_sky.py` — 3 tests, CI green
+  - `notebooks/03_physics_baseline.ipynb` — R²=0.78, MAE=3856 MW
+  - `docs/pm/decisions/ADR-001-physics-model-choice.md` written
+  - WK01 report written
 
 - **Phase 2 — EDA notebook** — completed 2026-04-23
   - Monthly/hourly patterns confirmed, cloud cover scatter, radiation scatter
