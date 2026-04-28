@@ -36,18 +36,18 @@
 - [x] Open-Meteo client
 - [x] Notebook 01 ingestion + sanity checks
 
-### Phase 2 — EDA + Physics Baseline (Days 6-8) — *unpacked later*
-- [ ] EDA notebook 02
-- [ ] pvlib clear-sky implementation
-- [ ] Notebook 03 physics baseline
-- [ ] ADR-001 + WK01 report
+### Phase 2 — EDA + Physics Baseline (Days 6-8)
+- [x] EDA notebook 02
+- [x] pvlib clear-sky implementation (`src/physics/clear_sky.py`)
+- [x] Notebook 03 physics baseline (R²=0.78)
+- [x] ADR-001 + WK01 report
 
-### Phase 3 — Features + XGBoost Residual (Days 9-12) — *unpacked later*
-- [ ] SQL feature view
-- [ ] Training matrix assembler
-- [ ] XGBoost residual + MLflow
-- [ ] Notebook 04 comparison
-- [ ] ADR-002
+### Phase 3 — Features + XGBoost Residual (Days 9-12)
+- [x] Feature engineering (`src/features/feature_view.py`)
+- [x] Training matrix assembler (`src/data/training_matrix.py`)
+- [x] XGBoost residual learner (R²=0.92, MAE=1552 MW) — MLflow deferred, not blocking
+- [x] Notebook 04 comparison
+- [x] ADR-002
 
 ### Phase 4 — Calibrated UQ (Days 13-16) — *unpacked later*
 - [ ] Quantile XGBoost
@@ -71,7 +71,7 @@
 
 ## 🏃 In Progress
 
-- Phase 4 -- Calibrated UQ (quantile XGBoost + conformal prediction + CRPS)
+- Phase 4.5 -- TimescaleDB integration (schema + ingestion + SQL feature view)
 
 ---
 
@@ -87,6 +87,14 @@
   - Repo public on GitHub, docker-compose + TimescaleDB running
   - smoke test passing locally, CI green on GitHub Actions
   - wiki notes 01–07 written, requirements fixed, README cleaned
+
+- **Phase 4 -- Calibrated UQ** -- completed 2026-04-28
+  - `src/models/quantile_model.py` -- P10/P50/P90 quantile XGBoost
+  - `src/models/conformal.py` -- split conformal calibration (generalised to any alpha)
+  - `src/evaluation/metrics.py` -- CRPS added
+  - `notebooks/05_uq.ipynb` -- P90 coverage=0.90, CRPS=514.6 MW, sharpness=3842 MW
+  - P50 miscalibration documented (seasonal exchangeability violation)
+  - wiki note 11 pending
 
 - **Phase 3 -- Features + XGBoost Residual** -- completed 2026-04-27
   - `src/features/feature_view.py` -- lag, rolling, time encoding features
