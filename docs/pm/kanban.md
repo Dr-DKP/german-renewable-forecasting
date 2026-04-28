@@ -49,12 +49,17 @@
 - [x] Notebook 04 comparison
 - [x] ADR-002
 
-### Phase 4 — Calibrated UQ (Days 13-16) — *unpacked later*
-- [ ] Quantile XGBoost
-- [ ] Conformal wrapper (MAPIE)
-- [ ] Reliability diagrams + CRPS
-- [ ] Notebook 05
-- [ ] Mid-sprint retro + WK02 + ADR-003
+### Phase 4 — Calibrated UQ (Days 13-16)
+- [x] Quantile XGBoost (P10/P50/P90)
+- [x] Conformal calibration (split conformal, generalised alpha)
+- [x] Reliability diagrams + CRPS (514.6 MW) + sharpness (3842 MW)
+- [x] Notebook 05
+- [ ] Mid-sprint retro + WK02 + ADR-003 — due next session
+
+### Phase 4.5 — TimescaleDB Integration (added 2026-04-28)
+- [ ] `sql/create_tables.sql` — hypertable DDL
+- [ ] `src/data/db_ingestion.py` — parquet → TimescaleDB
+- [ ] `sql/feature_view.sql` — SQL lag feature view
 
 ### Phase 5 — API + Dashboard + Docker (Days 17-19)
 - [ ] FastAPI /forecast + /health
