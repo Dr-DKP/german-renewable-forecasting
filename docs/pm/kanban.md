@@ -57,9 +57,9 @@
 - [ ] Mid-sprint retro + WK02 + ADR-003 — due next session
 
 ### Phase 4.5 — TimescaleDB Integration (added 2026-04-28)
-- [ ] `sql/create_tables.sql` — hypertable DDL
-- [ ] `src/data/db_ingestion.py` — parquet → TimescaleDB
-- [ ] `sql/feature_view.sql` — SQL lag feature view
+- [x] `sql/create_tables.sql` — hypertable DDL
+- [x] `src/data/db_ingestion.py` — parquet → TimescaleDB
+- [x] `sql/feature_view.sql` — SQL lag feature view
 
 ### Phase 5 — API + Dashboard + Docker (Days 17-19)
 - [ ] FastAPI /forecast + /health
@@ -76,7 +76,7 @@
 
 ## 🏃 In Progress
 
-- Phase 4.5 -- TimescaleDB integration (schema + ingestion + SQL feature view)
+- Phase 5 — FastAPI /forecast + /health endpoints
 
 ---
 
@@ -87,6 +87,12 @@
 ---
 
 ## ✅ Done
+
+- **Phase 4.5 — TimescaleDB Integration** — completed 2026-04-29
+  - `sql/create_tables.sql` — two hypertables: `solar_generation`, `weather_observations`
+  - `src/data/db_ingestion.py` — 26,281 solar rows + 26,304 weather rows loaded
+  - `sql/feature_view.sql` — SQL view with LAG + rolling AVG + EXTRACT time features
+  - `tests/test_smoke.py` — 4 tests: connection, extension, hypertable metadata, row count
 
 - **Phase 0 — Foundations** — completed 2026-04-20
   - Repo public on GitHub, docker-compose + TimescaleDB running

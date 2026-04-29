@@ -27,3 +27,26 @@ def test_timescaledb_extension():
     cur.close()
     conn.close()
     assert row is not None, "TimescaleDB extension not found — did the image load correctly?"
+
+def test_timescaledb_active_engine():
+    """Can we actually query TimescaleDB metadata?"""
+    conn = psycopg2.connect(**DB_PARAMS)
+    cur = conn.cursor()
+    
+    # This view only exists if TimescaleDB is active and working
+    cur.execute("SELECT * FROM timescaledb_information.hypertables;")
+    
+    rows = cur.fetchall()
+    assert len(rows) >= 2, f"Expected 2 hypertables, found {len(rows)}"
+
+    cur.close()
+    conn.close()
+
+def test_hypertables_have_data():
+    conn = psycopg2.connect(**DB_PARAMS)
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM solar_generation;")
+    count = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    assert count > 26000, f"Expected >26000 rows, got {count}"

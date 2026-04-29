@@ -11,7 +11,7 @@
 
 | ID | Risk | P | I | Mitigation | Status | Last review |
 |---|---|---|---|---|---|---|
-| R01 | SMARD API schema change or downtime during sprint | M | H | On Day 3, snapshot downloaded historical data into repo (git-LFS if needed). All code reads snapshot first, live API second. | Open | 2026-04-17 |
+| R01 | SMARD API schema change or downtime during sprint | M | H | Day 3: live API tested, 3 years fetchable. Day 4: raw parquet snapshots committed. Phase 4.5: data loaded into TimescaleDB hypertables — pipeline no longer depends on live API. | Mitigated | 2026-04-29 |
 | R02 | pvlib learning curve blocks progress >1 day | M | M | Fallback to simplified Ineichen-Perez analytical formula; ADR-001 documents the trade-off. | Open | 2026-04-17 |
 | R03 | Conformal prediction coverage misses target [78%, 82%] | L | H | If empirical coverage <78%: inspect residual distribution, switch to CQR (Conformalized Quantile Regression). | Open | 2026-04-17 |
 | R04 | 22-day P2 budget slips | M | H | Pre-declared scope cuts ready: (a) drop dashboard page 3, (b) drop Prophet comparison, (c) defer blog post to post-leave. | Open | 2026-04-17 |
