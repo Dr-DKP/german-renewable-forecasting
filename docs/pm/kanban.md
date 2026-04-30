@@ -62,9 +62,9 @@
 - [x] `sql/feature_view.sql` — SQL lag feature view
 
 ### Phase 5 — API + Dashboard + Docker (Days 17-19)
-- [ ] FastAPI /forecast + /health
-- [ ] Streamlit 3-page dashboard
-- [ ] docker-compose + clone-test
+- [x] FastAPI /forecast + /health + /actual
+- [x] Streamlit 3-page dashboard (forecast + model info + about)
+- [ ] docker-compose full stack + clone-test
 - [ ] ADR-004
 
 ### Phase 6 — Write-up (Days 20-22)
@@ -76,7 +76,7 @@
 
 ## 🏃 In Progress
 
-- Phase 5 — FastAPI /forecast + /health endpoints
+- Phase 5 — docker-compose full stack + clone-test + ADR-004
 
 ---
 
@@ -87,6 +87,13 @@
 ---
 
 ## ✅ Done
+
+- **Phase 5 (partial) — FastAPI + Streamlit** — completed 2026-04-30
+  - `app/main.py` — FastAPI with /health, /forecast (P10/P50/P90 + conformal corrections), /actual (TimescaleDB query)
+  - `app/streamlit_app.py` — 3-page dashboard: probabilistic forecast chart, physics decomposition bar chart, reliability diagram, actual vs predicted overlay
+  - `src/models/train.py` — MLflow training script, run ID: 7010b71b911640e09a5a0f5d42b78338
+  - Quantile crossing guard added (np.sort post-processing)
+  - session_state used to persist forecast across page navigation
 
 - **Phase 4.5 — TimescaleDB Integration** — completed 2026-04-29
   - `sql/create_tables.sql` — two hypertables: `solar_generation`, `weather_observations`
