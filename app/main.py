@@ -64,7 +64,7 @@ def forecast(date: str):
     p10, p50, p90 = stacked[:, 0], stacked[:, 1], stacked[:, 2]
     # return a list of dicts one per hour
     return {"date": date, "forecast": [
-    {"time": str(t), "p10_mw": round(float(p10[i]), 1),
+    {"time": str(t), "physics_mw": round(float(physics.values[i]), 1), "p10_mw": round(float(p10[i]), 1),
      "p50_mw": round(float(p50[i]), 1), "p90_mw": round(float(p90[i]), 1)}
     for i, t in enumerate(times)
     ]}
