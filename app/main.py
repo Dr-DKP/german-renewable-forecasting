@@ -68,3 +68,23 @@ def forecast(date: str):
      "p50_mw": round(float(p50[i]), 1), "p90_mw": round(float(p90[i]), 1)}
     for i, t in enumerate(times)
     ]}
+
+# /actual endpoint
+@app.get("/actual")
+def actual(date: str):
+    import psycopg2
+    DB_URL = "postgresql://solar:solar@localhost:5432/solar_db"
+    try:
+        times = pd.date_range(date, periods=24, freq="h", tz="UTC")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+    with psycopg2.connect(DB_URL) as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT time, solar_mw FROM solar_generation WHERE time >= %s AND time < %s ORDER BY time",
+            (str(times[0]), str(times[-1] + pd.Timedelta(hours=1)))
+        )
+        rows = cur.fetchall()
+    return {"date": date, "actual": [
+        {"time": str(r[0]), "actual_mw": round(float(r[1]), 1)} for r in rows
+    ]}

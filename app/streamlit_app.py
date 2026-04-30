@@ -27,7 +27,9 @@ if page == "Forecast":
     if "df" in st.session_state:
         df = st.session_state["df"]
         date = st.session_state["date"]
-    
+        actual_resp = requests.get(f"http://localhost:8000/actual?date={date}")
+        actual_data = actual_resp.json().get("actual", [])
+
         # Plot now data
         # Create three columns for top-level stats
         col1, col2, col3 = st.columns(3)
@@ -66,7 +68,14 @@ if page == "Forecast":
             line=dict(color='teal', width=3),
             name="Best Guess (P50)"
         ))
-
+        if actual_data:
+            df_actual = pd.DataFrame(actual_data)
+            df_actual["time"] = pd.to_datetime(df_actual["time"])
+            fig.add_trace(go.Scatter(
+                x=df_actual["time"], y=df_actual["actual_mw"],
+                mode="lines", name="Actual (SMARD)",
+                line=dict(color="black", width=2, dash="dot")
+            ))
         fig.update_layout(
             title=f"Probabilistic Solar Forecast — {date}",
             xaxis_title="Time of Day",
