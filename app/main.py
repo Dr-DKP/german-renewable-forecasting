@@ -55,10 +55,13 @@ def forecast(date: str):
     "cloud_cover_rolling_3h": 0.0,
     "physics_pred": physics.values
     }, index=times)
-    # predict and build response
+    # predict
     p10 = physics.values + models["q10"].predict(X)
-    p50 = physics.values + models["q50"].predict(X)
-    p90 = physics.values + models["q90"].predict(X)
+    p50 = physics.values + models["q50"].predict(X) + Q_HAT_P50
+    p90 = physics.values + models["q90"].predict(X) + Q_HAT_P90
+    # enforce p10 <= p50 <= p90 (independent quantile models can cross)
+    stacked = np.sort(np.stack([p10, p50, p90], axis=1), axis=1)
+    p10, p50, p90 = stacked[:, 0], stacked[:, 1], stacked[:, 2]
     # return a list of dicts one per hour
     return {"date": date, "forecast": [
     {"time": str(t), "p10_mw": round(float(p10[i]), 1),
