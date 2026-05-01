@@ -20,12 +20,13 @@ env/
 *.ipynb_checkpoints
 
 # Data (raw data too large for git)
-data/raw/
-data/external/
+# data/raw/
+# data/external/
 
 # MLflow
 mlruns/
 mlartifacts/
+mlflow.db
 
 # IDE
 .vscode/

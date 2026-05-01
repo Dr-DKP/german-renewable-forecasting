@@ -6,6 +6,8 @@ and About (Project summary, architechture,links).
 """
 
 # Import libraries
+import os
+API_URL = os.environ.get("API_URL", "http://localhost:8000")
 import streamlit as st
 import requests
 import pandas as pd
@@ -19,15 +21,18 @@ if page == "Forecast":
     st.title("Solar Generation Forecast: Germany")
     date = st.date_input("Select forecast date")
     if st.button("Get Forecast"):
-        resp = requests.get(f"http://localhost:8000/forecast?date={date}")
-        st.session_state["df"] = pd.DataFrame(resp.json()["forecast"])
+        resp = requests.get(f"{API_URL}/forecast?date={date}")
+        if resp.status_code != 200:
+            st.error(f"API error {resp.status_code}: {resp.json()}")
+        else:
+            st.session_state["df"] = pd.DataFrame(resp.json()["forecast"])
         st.session_state["df"]["time"] = pd.to_datetime(st.session_state["df"]["time"])
         st.session_state["date"] = date
 
     if "df" in st.session_state:
         df = st.session_state["df"]
         date = st.session_state["date"]
-        actual_resp = requests.get(f"http://localhost:8000/actual?date={date}")
+        actual_resp = requests.get(f"{API_URL}/actual?date={date}")
         actual_data = actual_resp.json().get("actual", [])
 
         # Plot now data
@@ -51,7 +56,7 @@ if page == "Forecast":
         fig.add_trace(go.Scatter(
             x=df["time"], y=df["p90_mw"],
             mode='lines', line=dict(width=0),
-            showlegend=False
+            showlegend=False, hoverinfo='skip'
         ))
         fig.add_trace(go.Scatter(
             x=df["time"], y=df["p10_mw"],
@@ -84,7 +89,7 @@ if page == "Forecast":
             template="plotly_white"
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
         # plot Physics vs Residual Decomposition
         st.subheader("Physics vs Residual Decomposition")
         df["residual_mw"] = df["p50_mw"] - df["physics_mw"]
@@ -107,7 +112,7 @@ if page == "Forecast":
             template="plotly_white",
             hovermode="x unified"
         )
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width='stretch')
 
         st.dataframe(df)
 
@@ -136,7 +141,7 @@ if page == "Model Info":
             "Value":  ["1,534 MW", "3,076 MW", "0.92", "0.869", "514.6 MW", "3,842 MW"],
             "vs Baseline": ["−60%", "−20%", "+18%", "target: 0.90", "vs MAE: −67%", "8% of peak"]
         }
-        st.dataframe(pd.DataFrame(metrics), hide_index=True, use_container_width=True)
+        st.dataframe(pd.DataFrame(metrics), hide_index=True, width='stretch')
 
     st.divider()
     st.subheader("Reliability")
@@ -152,7 +157,7 @@ if page == "Model Info":
     fig_r.update_layout(template="plotly_white",
         xaxis_title="Claimed quantile", yaxis_title="Observed coverage",
         title="Reliability Diagram — P50 miscalibrated (seasonal shift)")
-    st.plotly_chart(fig_r, use_container_width=True)
+    st.plotly_chart(fig_r, width='stretch')
 
 
 # Page 3: About

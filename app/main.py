@@ -9,18 +9,18 @@ from contextlib import asynccontextmanager
 from src.physics.clear_sky import compute_physics_pred
 
 # Constants
-RUN_ID = "7010b71b911640e09a5a0f5d42b78338"
 Q_HAT_P50 = 2.1
 Q_HAT_P90 = 770.1
 # models dict
 models = {}
 
 # lifespan function loads all three quantile models
+MODEL_BASE = "mlruns/1/models"
 @asynccontextmanager
 async def lifespan(app):
-    models["q10"] = mlflow.xgboost.load_model(f"runs:/{RUN_ID}/q10")
-    models["q50"] = mlflow.xgboost.load_model(f"runs:/{RUN_ID}/q50")
-    models["q90"] = mlflow.xgboost.load_model(f"runs:/{RUN_ID}/q90")
+    models["q10"] = mlflow.xgboost.load_model(f"{MODEL_BASE}/m-0cb8351d22e5407a99d73d518b78c425/artifacts")
+    models["q50"] = mlflow.xgboost.load_model(f"{MODEL_BASE}/m-7296d44be7f84aaa835a63ff2744629a/artifacts")
+    models["q90"] = mlflow.xgboost.load_model(f"{MODEL_BASE}/m-e7ee87b575fe460f8487be9437427ddc/artifacts")
     print("Models loaded.")
     yield
 app = FastAPI(lifespan=lifespan)
@@ -73,7 +73,7 @@ def forecast(date: str):
 @app.get("/actual")
 def actual(date: str):
     import psycopg2
-    DB_URL = "postgresql://solar:solar@localhost:5432/solar_db"
+    DB_URL = "postgresql://solar:solar@timescaledb:5432/solar_db"
     try:
         times = pd.date_range(date, periods=24, freq="h", tz="UTC")
     except Exception:

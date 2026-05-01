@@ -64,7 +64,7 @@
 ### Phase 5 — API + Dashboard + Docker (Days 17-19)
 - [x] FastAPI /forecast + /health + /actual
 - [x] Streamlit 3-page dashboard (forecast + model info + about)
-- [ ] docker-compose full stack + clone-test
+- [x] docker-compose full stack + clone-test
 - [ ] ADR-004
 
 ### Phase 6 — Write-up (Days 20-22)
@@ -76,7 +76,7 @@
 
 ## 🏃 In Progress
 
-- Phase 5 — docker-compose full stack + clone-test + ADR-004
+- ADR-004 — document API + Docker architecture decision
 
 ---
 
@@ -87,6 +87,13 @@
 ---
 
 ## ✅ Done
+
+- **Phase 5 — FastAPI + Streamlit + Docker** — completed 2026-05-01
+  - `Dockerfile` + `requirements-app.txt` — slim runtime image
+  - `docker-compose.yml` — 3 services: timescaledb, api, dashboard
+  - MLflow 3.x model loading fixed: direct artifact path via model UUID
+  - `API_URL` env var — works locally (`localhost:8000`) and in Docker (`api:8000`)
+
 
 - **Phase 5 (partial) — FastAPI + Streamlit** — completed 2026-04-30
   - `app/main.py` — FastAPI with /health, /forecast (P10/P50/P90 + conformal corrections), /actual (TimescaleDB query)
