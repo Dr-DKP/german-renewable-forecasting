@@ -1,4 +1,4 @@
-# START HERE — Day 1 Checklist
+# START HERE :  Day 1 Checklist
 
 **Date:** 2026-04-17 (Friday) · **You are about to begin Day 1 of the P2 sprint.**
 
@@ -6,24 +6,24 @@ Each bullet below is ~10-20 minutes. Do them in order.
 
 ---
 
-## Morning — before opening Claude
+## Morning :  before opening Claude
 
 - [ ] Read this file end-to-end (5 min).
 - [ ] Read `CLAUDE.md` end-to-end (10 min).
-- [ ] Read `P2_Energy_Forecasting.md` sections 1-4 — thesis, why this matters, scope, architecture (15 min).
+- [ ] Read `P2_Energy_Forecasting.md` sections 1-4: thesis, why this matters, scope, architecture (15 min).
 - [ ] Read `docs/pm/decisions/ADR-000-scope.md` (10 min).
 
-## In the terminal — 15 minutes
+## In the terminal :  15 minutes
 
 - [ ] `cd /Volumes/ExternalSSD/Users/deepak/Projects/Portfolio/german-renewable-forecasting`
-- [ ] `git status` — confirm clean working tree
-- [ ] Create public GitHub repo. Ask Claude for the exact `gh` command before running it. *(Claude will explain what `gh` is — the GitHub CLI tool — before showing the command.)*
+- [ ] `git status`: confirm clean working tree
+- [ ] Create public GitHub repo. Ask Claude for the exact `gh` command before running it. *(Claude will explain what `gh` is: the GitHub CLI tool, before showing the command.)*
 - [ ] Verify the repo appears public at `https://github.com/DR-DKP/german-renewable-forecasting`
 
-## With Claude — your first real session
+## With Claude :  your first real session
 
 - [ ] Open Claude in this directory
-- [ ] First message: **"Day 1 start — let's scaffold the project"**
+- [ ] First message: **"Day 1 start: let's scaffold the project"**
 - [ ] Claude will:
   1. Run the session-start ritual (read CLAUDE.md, kanban, etc.)
   2. Confirm today's focus in one sentence
@@ -36,7 +36,7 @@ Each bullet below is ~10-20 minutes. Do them in order.
 
 ---
 
-## End of Day 1 — success looks like
+## End of Day 1 :  success looks like
 
 - ✅ Public GitHub repo
 - ✅ `docker compose up` starts a TimescaleDB container
@@ -51,7 +51,7 @@ Each bullet below is ~10-20 minutes. Do them in order.
 
 ## Saturday rule reminder (Apr 18)
 
-Badminton 10:00-13:00. **No coding.** Before leaving, spend 2 minutes re-reading `CLAUDE.md` §1 — the project thesis. That is the only Saturday task.
+Badminton 10:00-13:00. **No coding.** Before leaving, spend 2 minutes re-reading `CLAUDE.md` §1, the project thesis. That is the only Saturday task.
 
 ## Sunday rule reminder (Apr 19)
 

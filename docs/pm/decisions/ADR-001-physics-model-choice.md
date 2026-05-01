@@ -1,6 +1,6 @@
 # ADR-001: Use pvlib Ineichen-Perez clear-sky model as physics baseline
 
-**Status:** Accepted — 2026-04-23
+**Status:** Accepted, 2026-04-23
 
 ---
 
@@ -14,7 +14,7 @@ Three options were evaluated:
 |---|---|---|
 | Ineichen-Perez (pvlib) | Industry standard, validated for Europe, built-in Linke turbidity | Single-point, not spatially resolved |
 | Simple latitude formula | Zero dependencies | Ignores atmosphere entirely, high error in winter |
-| ERA5 reanalysis NWP | Spatially resolved, physically complete | Large download, complex setup — deferred to P3 scope |
+| ERA5 reanalysis NWP | Spatially resolved, physically complete | Large download, complex setup, deferred to P3 scope |
 
 ## Decision
 
@@ -23,5 +23,5 @@ Use `pvlib.location.Location.get_clearsky()` with the Ineichen-Perez model. Scal
 ## Consequences
 
 - Physics baseline achieves **R² = 0.78**, **MAE = 3,856 MW** on daylight hours (2022–2024)
-- Residual is the XGBoost learning target — 22% unexplained variance remains
-- Limitation: single geographic point means spatial inhomogeneity (e.g. Bavaria clear, Hamburg overcast) is not captured — accepted for Germany aggregate scope
+- Residual is the XGBoost learning target: 22% unexplained variance remains
+- Limitation: single geographic point means spatial inhomogeneity (e.g. Bavaria clear, Hamburg overcast) is not captured: accepted for Germany aggregate scope

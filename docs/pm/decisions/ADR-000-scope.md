@@ -1,4 +1,4 @@
-# ADR-000 — Deliberate Scope for P2
+# ADR-000 :  Deliberate Scope for P2
 
 **Status:** Accepted
 **Date:** 2026-04-17
@@ -15,10 +15,10 @@ P2 is one of three portfolio projects in a 40-day parental-leave build sprint ta
 
 ## Decision drivers
 
-1. **Recruiter-readable in ≤3 minutes** — someone skimming the README must understand the differentiator in one paragraph.
-2. **PhD-level signal** — every technique used must either be physics-grounded or statistically rigorous.
-3. **Shippable in 22 days × 3h/day ≈ 66 build hours** — ruthless cut of anything that does not fit.
-4. **P3-compatible** — API contract must let P3 consume forecasts as a tool.
+1. **Recruiter-readable in ≤3 minutes**, someone skimming the README must understand the differentiator in one paragraph.
+2. **PhD-level signal**, every technique used must either be physics-grounded or statistically rigorous.
+3. **Shippable in 22 days × 3h/day ≈ 66 build hours**, ruthless cut of anything that does not fit.
+4. **P3-compatible**, API contract must let P3 consume forecasts as a tool.
 
 ## Considered options
 
@@ -60,9 +60,9 @@ P2 is one of three portfolio projects in a 40-day parental-leave build sprint ta
 | LLM / agentic layer | P3 scope. |
 
 ### Items kept despite tightness
-- **TimescaleDB** — "Postgres + hypertables" is hirable in DACH; extra infra day pays back.
-- **Docker multi-container** — "runs with one command" is the recruiter litmus test.
-- **CRPS** — the single clearest evidence of probabilistic-forecasting literacy; cheap to compute once.
+- **TimescaleDB**: "Postgres + hypertables" is hirable in DACH; extra infra day pays back.
+- **Docker multi-container**: "runs with one command" is the recruiter litmus test.
+- **CRPS**: the single clearest evidence of probabilistic-forecasting literacy; cheap to compute once.
 
 ## Consequences
 
@@ -73,10 +73,10 @@ P2 is one of three portfolio projects in a 40-day parental-leave build sprint ta
 ## Cross-project dependencies
 
 P3 will consume P2 via:
-- `GET /health` — pre-tool-call liveness check
+- `GET /health`: pre-tool-call liveness check
 - `POST /forecast` body: `{ "region": "DE", "horizon_hours": 24, "include_uncertainty": true }`
 - Response shape locked in Phase 5; any change requires amending this ADR + `ADR-004-api-contract.md`.
 
 ## Revisit
 
-This ADR is revisited at the mid-sprint retro (Day 13). If Phase 3 delivers faster than expected, items may move from "Deferred" to "Stretch" — but new work never enters without a scope amendment in this file.
+This ADR is revisited at the mid-sprint retro (Day 13). If Phase 3 delivers faster than expected, items may move from "Deferred" to "Stretch", but new work never enters without a scope amendment in this file.
