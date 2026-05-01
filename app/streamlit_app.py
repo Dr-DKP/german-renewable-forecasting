@@ -82,7 +82,7 @@ if page == "Forecast":
                 line=dict(color="black", width=2, dash="dot")
             ))
         fig.update_layout(
-            title=f"Probabilistic Solar Forecast — {date}",
+            title=f"Probabilistic Solar Forecast, {date}",
             xaxis_title="Time of Day",
             yaxis_title="Solar Power (MW)",
             hovermode="x unified", # Shows all values for a specific hour in one tooltip
@@ -156,7 +156,7 @@ if page == "Model Info":
         text=["P10","P50","P90"], textposition="top center", name="Observed"))
     fig_r.update_layout(template="plotly_white",
         xaxis_title="Claimed quantile", yaxis_title="Observed coverage",
-        title="Reliability Diagram — P50 miscalibrated (seasonal shift)")
+        title="Reliability Diagram, P50 miscalibrated (seasonal shift)")
     st.plotly_chart(fig_r, width='stretch')
 
 

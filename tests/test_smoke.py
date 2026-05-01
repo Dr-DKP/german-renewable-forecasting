@@ -26,7 +26,7 @@ def test_timescaledb_extension():
     row = cur.fetchone()                  # fetchone() returns first result row, or None
     cur.close()
     conn.close()
-    assert row is not None, "TimescaleDB extension not found — did the image load correctly?"
+    assert row is not None, "TimescaleDB extension not found, did the image load correctly?"
 
 def test_timescaledb_active_engine():
     """Can we actually query TimescaleDB metadata?"""
