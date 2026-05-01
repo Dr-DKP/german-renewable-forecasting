@@ -7,11 +7,11 @@ and About (Project summary, architechture,links).
 
 # Import libraries
 import os
-API_URL = os.environ.get("API_URL", "http://localhost:8000")
 import streamlit as st
 import requests
 import pandas as pd
-import matplotlib.pyplot as plt
+
+API_URL = os.environ.get("API_URL", "http://localhost:8000")
 
 # Page config
 page = st.sidebar.radio("Navigate", ["Forecast", "Model Info", "About"])
