@@ -39,13 +39,13 @@ mlflow.db
 .DS_Store
 Thumbs.db
 
-# Internal — planning docs, unrelated files
-CLAUDE.md
-P2_Energy_Forecasting.md
-p1_finalization+p3_planning.md
-career-anchor.jsx
+# Internal — all planning and personal files live in this folder
+Project_Related_files/
 docs/wiki/
-docs/INTERVIEW_REFERENCE.md
+docs/writing-drafts.md
+
+# P3 scaffold — lives in its own repo
+sensor-intelligence-assistant/
 
 # Environment files
 .env
@@ -63,3 +63,4 @@ models/saved/
 *.pt
 *.pth
 .vene/
+image*.png

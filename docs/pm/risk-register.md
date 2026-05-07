@@ -15,10 +15,10 @@
 | R02 | pvlib learning curve blocks progress >1 day | M | M | Fallback to simplified Ineichen-Perez analytical formula; ADR-001 documents the trade-off. | Open | 2026-04-17 |
 | R03 | Conformal prediction coverage misses target [78%, 82%] | L | H | If empirical coverage <78%: inspect residual distribution, switch to CQR (Conformalized Quantile Regression). | Open | 2026-04-17 |
 | R04 | 22-day P2 budget slips | M | H | Pre-declared scope cuts ready: (a) drop dashboard page 3, (b) drop Prophet comparison, (c) defer blog post to post-leave. | Open | 2026-04-17 |
-| R05 | Python-beginner debugging cost exceeds 1h/day | M | M | CLAUDE.md teaching contract + wiki accumulation. If 3 blockers/week → pause for remedial reading day. | Open | 2026-04-17 |
+| R05 | Python-beginner debugging cost exceeds 1h/day | M | M | Wiki accumulation + scientist-debugging discipline. If 3 blockers/week → pause for remedial reading day. | Open | 2026-04-17 |
 | R06 | Parental leave ends with P3 incomplete | M | M | P3 scoped tight to 15 days; 3-day buffer. If slipping → defer blog polish to post-leave. | Open | 2026-04-17 |
 | R07 | Burnout from overwork | L | H | Saturday sacred-rest (badminton). No work beyond 4h daily block. Partner aware of schedule. | Open | 2026-04-17 |
-| R08 | Scope creep from user asking for deferred items | M | M | CLAUDE.md R9: Claude must flag + log any scope-pressure event before acting. | Open | 2026-04-17 |
+| R08 | Scope creep from deferred features being requested mid-sprint | M | M | Scope discipline rule: flag any scope-pressure event and log in this register before acting. | Open | 2026-04-17 |
 
 ---
 
@@ -30,4 +30,4 @@
 
 ## New risks identified during sprint
 
-*Append as they surface. Claude updates this section at the end of each weekly report.*
+*Append as they surface. Updated at the end of each weekly report.*

@@ -8,7 +8,7 @@
 - **WK02**: end of Day 14 (2026-05-03), covers Phases 2-3 + start of 4
 - **WK03**: end of Day 22 (2026-05-12), covers Phases 5-6 (sprint close)
 
-Claude drafts each report during the Day 7 / 14 / 22 Close block. User edits and commits.
+Drafted during the Day 7 / 14 / 22 Close block and committed.
 
 ## Template (copy to `WK0N.md`)
 

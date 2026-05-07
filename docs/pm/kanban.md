@@ -23,7 +23,7 @@
 ### Phase 0: Foundations (Days 1-2)
 - [x] D1.1: `gh repo create` + push, public
 - [x] D1.2: `docker-compose.yml` with TimescaleDB service
-- [x] D1.3: Commit CLAUDE.md, P2 plan, README stub
+- [x] D1.3: Commit project operating contract, P2 plan, README stub
 - [x] D1.4: Commit ADR-000
 - [x] D1.5: Seed Kanban + risk register
 - [x] D2.1: `requirements.txt` + `environment.yml`

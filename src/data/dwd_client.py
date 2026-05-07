@@ -1,5 +1,5 @@
 """
-DWD Open Data Client — Deutscher Wetterdienst weather data.
+DWD Open Data Client, Deutscher Wetterdienst weather data.
 
 Fetches weather observations and forecasts (irradiance, wind speed,
 temperature, cloud cover) for coupling with energy generation models.
@@ -19,4 +19,4 @@ def fetch_weather_data(start_date: str, end_date: str, parameters: list[str]):
     Returns:
         pd.DataFrame with datetime index and weather columns.
     """
-    raise NotImplementedError("Phase 2 — weather integration planned")
+    raise NotImplementedError("Phase 2, weather integration planned")

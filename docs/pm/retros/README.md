@@ -7,7 +7,7 @@
 - **Mid-sprint retro**: end of Day 13 (2026-05-01), covers Phases 0-3
 - **Final retro**: end of Day 22 (2026-05-12), covers the whole sprint
 
-Claude facilitates by asking the Start / Stop / Continue questions at the Day 13 and Day 22 close blocks. User answers; Claude writes up the retro file; user edits and commits.
+Self-facilitated using the Start / Stop / Continue format at the Day 13 and Day 22 close blocks.
 
 ## Template (copy to `mid-sprint-retro.md` / `final-retro.md`)
 

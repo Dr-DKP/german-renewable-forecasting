@@ -14,19 +14,19 @@ import pandas as pd
 
 def add_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
     """Add cyclically encoded temporal features."""
-    raise NotImplementedError("Phase 2 — feature engineering in progress")
+    raise NotImplementedError("Phase 2, feature engineering in progress")
 
 
 def add_lag_features(df: pd.DataFrame, lags: list[int]) -> pd.DataFrame:
     """Add lagged generation values as features."""
-    raise NotImplementedError("Phase 2 — feature engineering in progress")
+    raise NotImplementedError("Phase 2, feature engineering in progress")
 
 
 def add_rolling_features(df: pd.DataFrame, windows: list[int]) -> pd.DataFrame:
     """Add rolling mean and std features."""
-    raise NotImplementedError("Phase 2 — feature engineering in progress")
+    raise NotImplementedError("Phase 2, feature engineering in progress")
 
 
 def build_feature_matrix(df: pd.DataFrame) -> pd.DataFrame:
     """Full feature engineering pipeline: temporal + lags + rolling + calendar."""
-    raise NotImplementedError("Phase 2 — feature engineering in progress")
+    raise NotImplementedError("Phase 2, feature engineering in progress")
