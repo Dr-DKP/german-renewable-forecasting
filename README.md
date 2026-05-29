@@ -252,7 +252,7 @@ german-renewable-forecasting/
 
 ## 11. About the author
 
-**Dr. Deepak K. Pandey**, physicist transitioning into industrial AI. 10 years of experimental physics (femtosecond spectroscopy, UHV systems, uncertainty propagation); now applying that discipline to renewable-energy forecasting and agentic AI systems.
+**Dr. Deepak K. Pandey**, physicist transitioning into industrial AI. 8+ years of experimental physics (femtosecond spectroscopy, UHV systems, uncertainty propagation); now applying that discipline to renewable-energy forecasting and agentic AI systems.
 
 - Website: [drdkp.com](https://drdkp.com)
 - LinkedIn: [linkedin.com/in/drdkp](https://linkedin.com/in/dr-deepak-k-pandey)
