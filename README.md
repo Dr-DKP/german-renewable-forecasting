@@ -255,7 +255,7 @@ german-renewable-forecasting/
 **Dr. Deepak K. Pandey**, physicist transitioning into industrial AI. 10 years of experimental physics (femtosecond spectroscopy, UHV systems, uncertainty propagation); now applying that discipline to renewable-energy forecasting and agentic AI systems.
 
 - Website: [drdkp.com](https://drdkp.com)
-- LinkedIn: [linkedin.com/in/drdkp](https://linkedin.com/in/drdkp)
+- LinkedIn: [linkedin.com/in/drdkp](https://linkedin.com/in/dr-deepak-k-pandey)
 - Companion projects:
   - **P1**: Predictive Maintenance on NASA C-MAPSS, *(separate repo: industrial-systems-monitoring)*
   - **P3**: Sensor Intelligence Assistant (LLM agent), *(coming May 2026)*
