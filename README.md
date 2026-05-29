@@ -185,7 +185,7 @@ This is what scientific project management looks like, applied to industrial AI.
 ### One-command startup
 
 ```bash
-git clone https://github.com/DR-DKP/german-renewable-forecasting.git
+git clone https://github.com/Dr-DKP/german-renewable-forecasting.git
 cd german-renewable-forecasting
 docker compose up --build
 ```
